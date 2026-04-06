@@ -29,6 +29,16 @@ npm start
 
 Buka: `http://localhost:3000`
 
+## Deployment Vercel
+
+Project ini sudah dikonfigurasi untuk Vercel (`vercel.json` + server Express compatible).
+
+Deploy production:
+
+```bash
+vercel --prod
+```
+
 ## Alur Penggunaan
 
 1. Masukkan **nama kasir** di halaman login.

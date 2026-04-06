@@ -6,9 +6,11 @@ const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const PRODUCTS_FILE = path.join(__dirname, 'data', 'products.json');
-const ORDERS_FILE = path.join(__dirname, 'data', 'orders.json');
-const SETTINGS_FILE = path.join(__dirname, 'data', 'settings.json');
+const SOURCE_DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.VERCEL ? path.join('/tmp', 'pos-data') : SOURCE_DATA_DIR;
+const PRODUCTS_FILE = path.join(DATA_DIR, 'products.json');
+const ORDERS_FILE = path.join(DATA_DIR, 'orders.json');
+const SETTINGS_FILE = path.join(DATA_DIR, 'settings.json');
 const PAYMENT_METHODS = ['Tunai', 'Kartu', 'QRIS', 'Transfer Bank'];
 const DEFAULT_SETTINGS = {
     vatRate: 11,
@@ -38,39 +40,58 @@ function requireCashier(req, res, next) {
     next();
 }
 
+function ensureDataDirectory() {
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+}
+
+function ensureDataFile(filePath, defaultContent, seedFilePath) {
+    ensureDataDirectory();
+    if (fs.existsSync(filePath)) {
+        return;
+    }
+
+    if (
+        seedFilePath &&
+        fs.existsSync(seedFilePath) &&
+        path.resolve(seedFilePath) !== path.resolve(filePath)
+    ) {
+        fs.copyFileSync(seedFilePath, filePath);
+        return;
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(defaultContent, null, 2));
+}
+
 function readProductsData() {
+    ensureDataFile(
+        PRODUCTS_FILE,
+        { categories: [], products: [] },
+        path.join(SOURCE_DATA_DIR, 'products.json')
+    );
     return JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
 }
 
 function writeProductsData(productsData) {
+    ensureDataDirectory();
     fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(productsData, null, 2));
 }
 
-function ensureOrdersFile() {
-    if (!fs.existsSync(ORDERS_FILE)) {
-        fs.writeFileSync(ORDERS_FILE, JSON.stringify([], null, 2));
-    }
-}
-
 function readOrdersData() {
-    ensureOrdersFile();
+    ensureDataFile(ORDERS_FILE, [], path.join(SOURCE_DATA_DIR, 'orders.json'));
     const raw = fs.readFileSync(ORDERS_FILE, 'utf8');
     const parsed = JSON.parse(raw || '[]');
     return Array.isArray(parsed) ? parsed : [];
 }
 
 function writeOrdersData(ordersData) {
+    ensureDataDirectory();
     fs.writeFileSync(ORDERS_FILE, JSON.stringify(ordersData, null, 2));
 }
 
-function ensureSettingsFile() {
-    if (!fs.existsSync(SETTINGS_FILE)) {
-        fs.writeFileSync(SETTINGS_FILE, JSON.stringify(DEFAULT_SETTINGS, null, 2));
-    }
-}
-
 function readSettingsData() {
-    ensureSettingsFile();
+    ensureDataFile(SETTINGS_FILE, DEFAULT_SETTINGS, path.join(SOURCE_DATA_DIR, 'settings.json'));
     const raw = fs.readFileSync(SETTINGS_FILE, 'utf8');
     const parsed = JSON.parse(raw || '{}');
     const vatRate = Number(parsed.vatRate);
@@ -81,6 +102,7 @@ function readSettingsData() {
 }
 
 function writeSettingsData(settingsData) {
+    ensureDataDirectory();
     fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settingsData, null, 2));
 }
 
@@ -396,7 +418,10 @@ app.get('/api/orders/:id', requireCashier, (req, res) => {
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`🚀 POS Server running on http://localhost:${PORT}`);
-});
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`🚀 POS Server running on http://localhost:${PORT}`);
+    });
+}
+
+module.exports = app;
