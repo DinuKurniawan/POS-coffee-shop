@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Penjualan - POS Kedai Kopi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <%- include('partials/header') %>
+    
+    <div class="container mx-auto p-4">
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold mb-6 text-gray-800">Laporan Penjualan Harian</h2>
+            
+            <%
+                const formatRupiah = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+                const normalizePayment = (method) => ({ Cash: 'Tunai', Card: 'Kartu', Mobile: 'QRIS' }[method] || method || 'Tunai');
+                const categoryLabel = (id) => ({
+                    'kopi': 'Kopi',
+                    'non-kopi': 'Non Kopi',
+                    'makanan': 'Makanan',
+                    'pastri': 'Pastri'
+                }[id] || id || 'Tidak diketahui');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const todayOrders = orders.filter(order => {
+                    const orderDate = new Date(order.timestamp);
+                    orderDate.setHours(0, 0, 0, 0);
+                    return orderDate.getTime() === today.getTime();
+                });
+                
+                const totalSales = todayOrders.reduce((sum, order) => sum + order.total, 0);
+                const totalOrders = todayOrders.length;
+                
+                // Payment method breakdown
+                const paymentBreakdown = {};
+                todayOrders.forEach(order => {
+                    const method = normalizePayment(order.paymentMethod);
+                    paymentBreakdown[method] = (paymentBreakdown[method] || 0) + order.total;
+                });
+                
+                // Category breakdown
+                const categoryBreakdown = {};
+                const categoryCount = {};
+                todayOrders.forEach(order => {
+                    order.items.forEach(item => {
+                        const cat = item.category || 'Tidak diketahui';
+                        categoryBreakdown[cat] = (categoryBreakdown[cat] || 0) + (item.price * item.quantity);
+                        categoryCount[cat] = (categoryCount[cat] || 0) + item.quantity;
+                    });
+                });
+                
+                // Cashier breakdown
+                const cashierBreakdown = {};
+                todayOrders.forEach(order => {
+                    const cashier = order.cashierName || 'Tidak diketahui';
+                    cashierBreakdown[cashier] = (cashierBreakdown[cashier] || 0) + order.total;
+                });
+                
+                // Average order value
+                const avgOrderValue = totalOrders > 0 ? totalSales / totalOrders : 0;
+            %>
+            
+            <!-- Summary Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-6 text-white shadow-lg">
+                    <p class="text-sm font-semibold mb-1 opacity-90">Total Penjualan</p>
+                    <p class="text-4xl font-bold"><%= formatRupiah(totalSales) %></p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-6 text-white shadow-lg">
+                    <p class="text-sm font-semibold mb-1 opacity-90">Jumlah Pesanan</p>
+                    <p class="text-4xl font-bold"><%= totalOrders %></p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-6 text-white shadow-lg">
+                    <p class="text-sm font-semibold mb-1 opacity-90">Rata-rata Nilai Pesanan</p>
+                    <p class="text-4xl font-bold"><%= formatRupiah(avgOrderValue) %></p>
+                </div>
+                
+                <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-6 text-white shadow-lg">
+                    <p class="text-sm font-semibold mb-1 opacity-90">Tanggal</p>
+                    <p class="text-2xl font-bold"><%= today.toLocaleDateString('id-ID') %></p>
+                </div>
+            </div>
+            
+            <!-- Detailed Breakdowns -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Payment Methods -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Metode Pembayaran</h3>
+                    <% if (Object.keys(paymentBreakdown).length === 0) { %>
+                        <p class="text-gray-500">Belum ada data</p>
+                    <% } else { %>
+                        <div class="space-y-3">
+                            <% Object.entries(paymentBreakdown).forEach(([method, amount]) => { %>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-700">
+                                        <% if (method === 'Tunai') { %>💵<% } else if (method === 'Kartu') { %>💳<% } else if (method === 'Transfer Bank') { %>🏦<% } else { %>📱<% } %>
+                                        <%= method %>
+                                    </span>
+                                    <span class="font-bold text-indigo-600"><%= formatRupiah(amount) %></span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-indigo-600 h-2 rounded-full" style="width: <%= (amount / totalSales * 100).toFixed(1) %>%"></div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Categories -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Penjualan per Kategori</h3>
+                    <% if (Object.keys(categoryBreakdown).length === 0) { %>
+                        <p class="text-gray-500">Belum ada data</p>
+                    <% } else { %>
+                        <div class="space-y-2">
+                            <% Object.entries(categoryBreakdown).forEach(([category, amount]) => { %>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <div>
+                                        <p class="font-semibold text-gray-700"><%= categoryLabel(category) %></p>
+                                        <p class="text-sm text-gray-500"><%= categoryCount[category] %> item terjual</p>
+                                    </div>
+                                    <span class="font-bold text-indigo-600"><%= formatRupiah(amount) %></span>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Cashiers -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Penjualan per Kasir</h3>
+                    <% if (Object.keys(cashierBreakdown).length === 0) { %>
+                        <p class="text-gray-500">Belum ada data</p>
+                    <% } else { %>
+                        <div class="space-y-2">
+                            <% Object.entries(cashierBreakdown).forEach(([cashier, amount]) => { %>
+                                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                                    <p class="font-semibold text-gray-700"><%= cashier %></p>
+                                    <span class="font-bold text-indigo-600"><%= formatRupiah(amount) %></span>
+                                </div>
+                            <% }) %>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+            
+            <!-- Recent Orders -->
+            <div class="border border-gray-200 rounded-lg p-4">
+                <h3 class="text-xl font-bold mb-4 text-gray-800">Pesanan Hari Ini</h3>
+                <% if (todayOrders.length === 0) { %>
+                    <p class="text-gray-500 text-center py-8">Belum ada pesanan hari ini</p>
+                <% } else { %>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="bg-gray-100 text-gray-700">
+                                    <th class="px-4 py-2 text-left font-semibold">No. Pesanan</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Waktu</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Pelanggan</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Kasir</th>
+                                    <th class="px-4 py-2 text-left font-semibold">Pembayaran</th>
+                                    <th class="px-4 py-2 text-right font-semibold">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% todayOrders.slice().reverse().forEach(order => { %>
+                                    <tr class="border-b border-gray-100">
+                                        <td class="px-4 py-2 font-semibold">#<%= order.id %></td>
+                                        <td class="px-4 py-2 text-sm"><%= new Date(order.timestamp).toLocaleTimeString('id-ID') %></td>
+                                        <td class="px-4 py-2"><%= order.customerName %></td>
+                                        <td class="px-4 py-2"><%= order.cashierName %></td>
+                                        <td class="px-4 py-2"><%= normalizePayment(order.paymentMethod) %></td>
+                                        <td class="px-4 py-2 text-right font-bold text-indigo-600"><%= formatRupiah(order.total) %></td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

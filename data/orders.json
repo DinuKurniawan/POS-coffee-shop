@@ -1,0 +1,73 @@
+[
+  {
+    "id": 1,
+    "items": [
+      {
+        "id": 3,
+        "name": "Cappuccino",
+        "category": "kopi",
+        "price": 28000,
+        "quantity": 1
+      },
+      {
+        "id": 6,
+        "name": "V60 Manual Brew",
+        "category": "kopi",
+        "price": 35000,
+        "quantity": 1
+      },
+      {
+        "id": 5,
+        "name": "Kopi Susu Gula Aren",
+        "category": "kopi",
+        "price": 32000,
+        "quantity": 1
+      },
+      {
+        "id": 2,
+        "name": "Americano",
+        "category": "kopi",
+        "price": 22000,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 117000,
+    "tax": 17550,
+    "vatRate": 15,
+    "total": 134550,
+    "customerName": "Pelanggan Umum",
+    "cashierName": "Akmal",
+    "paymentMethod": "Tunai",
+    "bankAccount": null,
+    "paymentStatus": "Lunas",
+    "customerNotification": "Halo Pelanggan Umum, pembayaran Rp 134.550 untuk Pesanan #1 sudah kami terima. Terima kasih.",
+    "paidAt": "2026-04-06T15:01:50.311Z",
+    "timestamp": "2026-04-06T15:01:50.311Z",
+    "status": "Selesai"
+  },
+  {
+    "id": 2,
+    "items": [
+      {
+        "id": 3,
+        "name": "Cappuccino",
+        "category": "kopi",
+        "price": 28000,
+        "quantity": 1
+      }
+    ],
+    "subtotal": 28000,
+    "tax": 4200,
+    "vatRate": 15,
+    "total": 32200,
+    "customerName": "Pelanggan Umum",
+    "cashierName": "Akmal",
+    "paymentMethod": "QRIS",
+    "bankAccount": null,
+    "paymentStatus": "Lunas",
+    "customerNotification": "Halo Pelanggan Umum, pembayaran Rp 32.200 untuk Pesanan #2 sudah kami terima. Terima kasih.",
+    "paidAt": "2026-04-06T15:02:14.093Z",
+    "timestamp": "2026-04-06T15:02:14.093Z",
+    "status": "Selesai"
+  }
+]

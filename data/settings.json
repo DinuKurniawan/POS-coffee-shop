@@ -1,0 +1,12 @@
+{
+  "vatRate": 15,
+  "bankAccounts": [
+    {
+      "id": 1,
+      "bankName": "Bank Central Asia (BCA)",
+      "accountNumber": "123456789",
+      "accountHolder": "Kimak",
+      "branch": ""
+    }
+  ]
+}

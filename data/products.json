@@ -1,0 +1,146 @@
+{
+  "categories": [
+    {
+      "id": "kopi",
+      "name": "Kopi",
+      "icon": "☕"
+    },
+    {
+      "id": "non-kopi",
+      "name": "Non Kopi",
+      "icon": "🍵"
+    },
+    {
+      "id": "makanan",
+      "name": "Makanan",
+      "icon": "🍽️"
+    },
+    {
+      "id": "pastri",
+      "name": "Pastri",
+      "icon": "🥐"
+    }
+  ],
+  "products": [
+    {
+      "id": 1,
+      "name": "Espresso",
+      "category": "kopi",
+      "price": 18000,
+      "image": "☕",
+      "description": "Espresso single shot dengan karakter kuat"
+    },
+    {
+      "id": 2,
+      "name": "Americano",
+      "category": "kopi",
+      "price": 22000,
+      "image": "☕",
+      "description": "Espresso dengan tambahan air panas"
+    },
+    {
+      "id": 3,
+      "name": "Cappuccino",
+      "category": "kopi",
+      "price": 28000,
+      "image": "☕",
+      "description": "Espresso, susu steamed, dan foam lembut"
+    },
+    {
+      "id": 4,
+      "name": "Cafe Latte",
+      "category": "kopi",
+      "price": 30000,
+      "image": "☕",
+      "description": "Espresso dengan susu segar yang creamy"
+    },
+    {
+      "id": 5,
+      "name": "Kopi Susu Gula Aren",
+      "category": "kopi",
+      "price": 32000,
+      "image": "🧋",
+      "description": "Espresso, susu, dan gula aren asli"
+    },
+    {
+      "id": 6,
+      "name": "V60 Manual Brew",
+      "category": "kopi",
+      "price": 35000,
+      "image": "☕",
+      "description": "Seduhan manual biji kopi single origin"
+    },
+    {
+      "id": 7,
+      "name": "Matcha Latte",
+      "category": "non-kopi",
+      "price": 32000,
+      "image": "🍵",
+      "description": "Matcha premium dengan susu segar"
+    },
+    {
+      "id": 8,
+      "name": "Chocolate Signature",
+      "category": "non-kopi",
+      "price": 30000,
+      "image": "🍫",
+      "description": "Cokelat hangat kental dengan rasa rich"
+    },
+    {
+      "id": 9,
+      "name": "Teh Tarik",
+      "category": "non-kopi",
+      "price": 23000,
+      "image": "🫖",
+      "description": "Teh susu tarik khas dengan foam lembut"
+    },
+    {
+      "id": 10,
+      "name": "Croissant Butter",
+      "category": "pastri",
+      "price": 22000,
+      "image": "🥐",
+      "description": "Croissant renyah dengan aroma butter"
+    },
+    {
+      "id": 11,
+      "name": "Pain au Chocolat",
+      "category": "pastri",
+      "price": 25000,
+      "image": "🥐",
+      "description": "Pastri isi cokelat premium"
+    },
+    {
+      "id": 12,
+      "name": "Banana Bread",
+      "category": "pastri",
+      "price": 24000,
+      "image": "🍞",
+      "description": "Banana bread homemade, moist dan legit"
+    },
+    {
+      "id": 13,
+      "name": "Chicken Sandwich",
+      "category": "makanan",
+      "price": 36000,
+      "image": "🥪",
+      "description": "Roti artisan isi ayam panggang"
+    },
+    {
+      "id": 14,
+      "name": "Nasi Goreng Kampung",
+      "category": "makanan",
+      "price": 38000,
+      "image": "🍛",
+      "description": "Nasi goreng rumahan dengan telur"
+    },
+    {
+      "id": 15,
+      "name": "Mie Goreng Spesial",
+      "category": "makanan",
+      "price": 35000,
+      "image": "🍜",
+      "description": "Mie goreng dengan topping komplet"
+    }
+  ]
+}

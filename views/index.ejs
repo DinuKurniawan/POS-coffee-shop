@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Kedai Kopi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; }
+        }
+        .print-only { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <%- include('partials/header') %>
+    <% const formatRupiah = (value) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value); %>
+    
+    <div class="container mx-auto p-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Products Section -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Menu</h2>
+                    
+                    <!-- Category Filter -->
+                    <div class="flex gap-2 mb-6 flex-wrap">
+                        <button onclick="filterCategory('all', this)" class="category-btn px-4 py-2 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition">
+                            Semua
+                        </button>
+                        <% products.categories.forEach(cat => { %>
+                            <button onclick="filterCategory('<%= cat.id %>', this)" class="category-btn px-4 py-2 rounded-lg bg-gray-200 text-gray-700 font-semibold hover:bg-gray-300 transition">
+                                <%= cat.icon %> <%= cat.name %>
+                            </button>
+                        <% }) %>
+                    </div>
+                    
+                    <!-- Products Grid -->
+                    <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <% products.products.forEach(product => { %>
+                            <div class="product-card border border-gray-200 rounded-lg p-4 hover:shadow-lg transition cursor-pointer bg-white" 
+                                 data-category="<%= product.category %>"
+                                 onclick='addToCart(<%= JSON.stringify(product) %>)'>
+                                <div class="text-5xl mb-2 text-center"><%= product.image %></div>
+                                <h3 class="font-bold text-gray-800 mb-1"><%= product.name %></h3>
+                                <p class="text-sm text-gray-600 mb-2"><%= product.description %></p>
+                                <p class="text-xl font-bold text-indigo-600"><%= formatRupiah(product.price) %></p>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cart Section -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6 sticky top-4">
+                    <h2 class="text-2xl font-bold mb-4 text-gray-800">Pesanan Saat Ini</h2>
+                    
+                    <!-- Customer Name -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Pelanggan</label>
+                        <input type="text" id="customerName" placeholder="Masukkan nama pelanggan..." class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    
+                    <!-- Payment Method -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran</label>
+                        <select id="paymentMethod" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="Tunai">💵 Tunai</option>
+                            <option value="Kartu">💳 Kartu Debit/Kredit</option>
+                            <option value="QRIS">📱 QRIS / E-Wallet</option>
+                            <option value="Transfer Bank">🏦 Transfer Bank</option>
+                        </select>
+                    </div>
+
+                    <div id="bankAccountContainer" class="hidden mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Rekening Tujuan</label>
+                        <select id="bankAccountId" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+                            <option value="">Pilih rekening bank</option>
+                            <% settings.bankAccounts.forEach(account => { %>
+                                <option value="<%= account.id %>"><%= account.bankName %> - <%= account.accountNumber %> a/n <%= account.accountHolder %></option>
+                            <% }) %>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">Rekening dikelola dari menu <strong>Pengaturan</strong>.</p>
+                    </div>
+                    
+                    <!-- Cart Items -->
+                    <div id="cart-items" class="mb-4 max-h-64 overflow-y-auto">
+                        <p class="text-gray-500 text-center py-8">Keranjang masih kosong</p>
+                    </div>
+                    
+                    <!-- Total -->
+                    <div class="border-t pt-4 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-600">Subtotal:</span>
+                            <span class="font-semibold text-gray-800" id="subtotal">Rp0</span>
+                        </div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-600">PPN (<span id="vat-rate-label"><%= settings.vatRate %></span>%):</span>
+                            <span class="font-semibold text-gray-800" id="tax">Rp0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xl font-bold text-gray-800 border-t pt-2">
+                            <span>Total:</span>
+                            <span class="text-indigo-600" id="total">Rp0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="space-y-2">
+                        <button onclick="checkout()" id="checkout-btn" disabled class="w-full bg-indigo-600 text-white py-3 rounded-lg font-semibold hover:bg-indigo-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed">
+                            Simpan Pesanan
+                        </button>
+                        <button onclick="clearCart()" class="w-full bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
+                            Kosongkan Keranjang
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        window.POS_CONFIG = <%- JSON.stringify(settings) %>;
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/pos.js"></script>
+</body>
+</html>
